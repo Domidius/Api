@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang='en' class=''>
+
+<head>
+
+  <meta charset='UTF-8'>
+  <title>CodePen Demo</title>
+
+  <meta name="robots" content="noindex">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Sans">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+
+  <style id="INLINE_PEN_STYLESHEET_ID">
+    html,
+body {
+  height: 100%;
+}
+
+a {
+  color: #ff477e;
+}
+
+h1,
+p,
+a,
+span,
+input,
+select,
+option {
+  font-family: "Fira Sans", sans-serif;
+}
+
+body {
+  transition: background 300ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1a1a1a;
+  background-repeat: no-repeat;
+  background-blend-mode: multiply;
+  background-position: center;
+  background-size: cover;
+}
+body.BTC {
+  background-color: rgba(0, 0, 0, 0.7);
+  background-image: url("https://steemit-production-imageproxy-upload.s3.amazonaws.com/DQmTCUD6ZfRE8PspR78pEgFHBGyet8VNqkajGvasbYGFjyN");
+}
+body.ETH {
+  background-color: rgba(0, 0, 0, 0.7);
+  background-image: url("https://karl.tech/content/images/2016/04/ethereum-road-network.jpg");
+}
+
+.wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+}
+.wrapper h1 {
+  margin-bottom: 10px;
+  color: #ff145a;
+}
+.wrapper form {
+  display: flex;
+}
+.wrapper form input,
+.wrapper form select {
+  border: 0;
+  background: #ff145a;
+  padding: 10px;
+  color: #fff;
+}
+.wrapper form input:not(:last-child),
+.wrapper form select:not(:last-child) {
+  margin-right: 10px;
+}
+.wrapper form input:focus,
+.wrapper form select:focus {
+  outline: 0;
+}
+.wrapper form option:selected {
+  background: #1a1a1a;
+}
+.wrapper form option:checked {
+  background: #1a1a1a;
+}
+.wrapper p,
+.wrapper span {
+  color: #fff;
+}
+.wrapper span {
+  margin-bottom: 50px;
+}
+  </style>
+
+  
+
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>Cryptocurrency Converter</h1>
+    <span>This cryptocurrency converter was made with the <a href="https://cryptocompare.com/api">CryptoCompare API</a></span>
+
+    <form>
+        <select name="currencyFrom" id="currencyFrom">
+            <option value="">-- Select a currency --</option>
+            <option value="BTC">BTC</option>
+            <option value="ETH">ETH</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+        </select>
+        <input type="number" name="amountFrom" id="amountFrom">
+        <select name="currencyTo" id="currencyTo">
+            <option value="">-- Select a currency --</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="BTC">BTC</option>
+            <option value="ETH">ETH</option>
+        </select>
+    </form>
+
+    <p id="result">Select some currencies and an amount to convert</p>
+</div>
+
+  
+  <script  src="https://cdpn.io/cpe/boomboom/pen.js?key=pen.js-13d62770-6fad-e16e-2091-2364d77aa07c" crossorigin></script>
+</body>
+
+</html>
+
+<script>
+  const bodyEl = document.querySelector("body");
+const resultEl = document.querySelector("#result");
+const currencyFromSelect = document.querySelector("#currencyFrom");
+const amountFromInput = document.querySelector("#amountFrom");
+const currencyToSelect = document.querySelector("#currencyTo");
+
+let currencyFromValue = currencyFromSelect.value;
+let amountFromValue = amountFrom.value;
+let currencyToValue = currencyToSelect.value;
+
+currencyFromSelect.addEventListener("change", () => {
+  currencyFromValue = currencyFromSelect.value;
+  bodyEl.className = "";
+  bodyEl.classList.add(currencyFromSelect.value);
+  validate();
+});
+
+amountFromInput.addEventListener("change", () => {
+  amountFromValue = amountFromInput.value;
+  validate();
+});
+
+currencyToSelect.addEventListener("change", () => {
+  currencyToValue = currencyToSelect.value;
+  validate();
+});
+
+/**
+ * Check input values and submit or show message.
+ */
+function validate() {
+  if (
+    currencyFromValue !== "" &&
+    amountFromValue !== "" &&
+    currencyToValue !== ""
+  ) {
+    submit();
+  } else {
+    resultEl.innerText = "Select some currencies and an amount to convert";
+  }
+}
+
+/**
+ * Multiplies two floats without losing precision.
+ */
+function multFloats(x, y) {
+  debugger;
+  if (String(x).length > 1 && String(y).length > 1) {
+    const xP = String(x).split(".")[1].length;
+    const yP = String(y).split(".")[1].length;
+    const _x = x * Math.pow(10, xP);
+    const _y = y * Math.pow(10, yP);
+    return (_x * _y) / Math.pow(10, xP + yP);
+  } else {
+    return x * y;
+  }
+}
+
+/**
+ * Setup variables with result info and do request.
+ */
+function submit() {
+  const url = `https://min-api.cryptocompare.com/data/price?fsym=${currencyFromValue}&tsyms=${currencyToValue}`;
+
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => {
+      const fromText = `${amountFromValue} ${currencyFromValue}`;
+      const inputAmount = parseFloat(amountFromValue);
+      const dataAmount = parseFloat(data[currencyToValue]);
+      const resultAmount = multFloats(inputAmount, dataAmount);
+      const toText = `${resultAmount} ${currencyToValue}`;
+      result.innerText = `${fromText} = ${toText}`;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+  </script>
